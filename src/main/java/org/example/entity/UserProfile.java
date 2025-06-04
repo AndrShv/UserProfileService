@@ -30,7 +30,7 @@ public class UserProfile {
     private String userTagId;
 
     @Column(name = "avatar_url", nullable = false, unique = true)
-    private String avatar_url;
+    private String avatarUrl;
 
     @Column(name = "profile_description")
     private String profileDescription;

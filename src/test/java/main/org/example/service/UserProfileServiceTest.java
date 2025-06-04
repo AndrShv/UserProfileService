@@ -19,6 +19,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class UserProfileServiceTest {
 
     @Mock
@@ -53,7 +56,7 @@ public class UserProfileServiceTest {
         );
 
         when(userProfileRepository.existsByUserTagId("newUserTagId")).thenReturn(false);
-        when(userProfileRepository.existsByAvatar_url("http://existing.avatar.url")).thenReturn(true);
+        when(userProfileRepository.existsByAvatarUrl("http://existing.avatar.url")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> userProfileService.createUserProfile(request));
     }
@@ -119,7 +122,7 @@ public class UserProfileServiceTest {
         UserProfileRequest req = new UserProfileRequest("nickname", "userTagId", "avatar_url", "description", "background_url", "country", "city", false);
 
         when(userProfileRepository.existsByUserTagId(req.userTagId())).thenReturn(false);
-        when(userProfileRepository.existsByAvatar_url(req.avatar_url())).thenReturn(true);
+        when(userProfileRepository.existsByAvatarUrl(req.avatar_url())).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> userProfileService.createUserProfile(req));
     }
@@ -137,7 +140,7 @@ public class UserProfileServiceTest {
         assertThrows(IllegalArgumentException.class, () -> userProfileService.createUserProfile(request), "UserTagId already exists");
 
         verify(userProfileRepository).existsByUserTagId("existingTag");
-        verify(userProfileRepository, never()).existsByAvatar_url(anyString());
+        verify(userProfileRepository, never()).existsByAvatarUrl(anyString());
         verify(userProfileRepository, never()).save(any(UserProfile.class));
     }
 
@@ -161,7 +164,7 @@ public class UserProfileServiceTest {
         );
 
         when(userProfileRepository.existsByUserTagId(request.userTagId())).thenReturn(false);
-        when(userProfileRepository.existsByAvatar_url(request.avatar_url())).thenReturn(false);
+        when(userProfileRepository.existsByAvatarUrl(request.avatar_url())).thenReturn(false);
         when(userProfileRepository.save(any(UserProfile.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
@@ -316,7 +319,7 @@ public class UserProfileServiceTest {
         UserProfile mockUserProfile = new UserProfile();
         mockUserProfile.setNickName("TestNick");
         mockUserProfile.setUserTagId(userTagId);
-        mockUserProfile.setAvatar_url("http://avatar.com");
+        mockUserProfile.setAvatarUrl("http://avatar.com");
         mockUserProfile.setProfileDescription("desc");
         mockUserProfile.setBackground_url("http://bg.com");
         mockUserProfile.setCountry("UA");

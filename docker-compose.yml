@@ -3,10 +3,10 @@ version: "3.8"
 services:
   mysql:
     image: mysql:8.0
-    container_name: userprofileervice-mysql
+    container_name: userprofileservice-mysql
     environment:
       MYSQL_ROOT_PASSWORD: 1111
-      MYSQL_DATABASE: userprofileervice
+      MYSQL_DATABASE: userprofileservice
     ports:
       - "3307:3306"
     volumes:
