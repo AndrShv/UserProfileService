@@ -5,14 +5,17 @@ import org.example.DTO.request.UserProfileRequest;
 import org.example.DTO.response.UserProfileResponse;
 import org.example.entity.Subscription;
 import org.example.entity.UserProfile;
+import org.example.event.UserRegisteredEvent;
 import org.example.repository.SubscriptionRepository;
 import org.example.repository.UserProfileRepository;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserProfileService {
@@ -157,4 +160,9 @@ public class UserProfileService {
                 up.getCreatedAt()
         );
     }
+    @KafkaListener(topics = "user-registered", groupId = "user-profile-group")
+    public void handleUserRegistered(UserRegisteredEvent event) {
+        log.info("Received event: {}", event);
+    }
+
 }
