@@ -19,6 +19,7 @@ public class UserProfileController {
 
     private final UserProfileService service;
 
+
     @PostMapping
     public ResponseEntity<UserProfileResponse> create(@RequestBody @Valid UserProfileRequest req) {
         UserProfileResponse resp = service.createUserProfile(req);

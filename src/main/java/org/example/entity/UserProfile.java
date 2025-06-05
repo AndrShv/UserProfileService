@@ -50,4 +50,6 @@ public class UserProfile {
 
     @Column(name = "city")
     private String city;
+
+
 }

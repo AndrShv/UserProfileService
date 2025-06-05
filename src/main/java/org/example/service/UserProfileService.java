@@ -19,6 +19,8 @@ public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final SubscriptionRepository subscriptionRepository;
 
+
+
     // 1) Создать профиль
     public UserProfileResponse createUserProfile(UserProfileRequest req) {
         if (userProfileRepository.existsByUserTagId(req.userTagId())) {
