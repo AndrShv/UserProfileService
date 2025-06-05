@@ -5,33 +5,38 @@ import org.example.DTO.request.UserProfileRequest;
 import org.example.DTO.response.UserProfileResponse;
 import org.example.entity.Subscription;
 import org.example.entity.UserProfile;
+import org.example.event.UserRegisteredEvent;
 import org.example.repository.SubscriptionRepository;
 import org.example.repository.UserProfileRepository;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final SubscriptionRepository subscriptionRepository;
 
+
+
     // 1) Создать профиль
     public UserProfileResponse createUserProfile(UserProfileRequest req) {
         if (userProfileRepository.existsByUserTagId(req.userTagId())) {
             throw new IllegalArgumentException("UserTagId already exists");
         }
-        if (userProfileRepository.existsByAvatar_url(req.avatar_url())) {
+        if (userProfileRepository.existsByAvatarUrl(req.avatar_url())) {
             throw new IllegalArgumentException("Avatar URL already in use");
         }
 
         UserProfile userProfile = new UserProfile();
         userProfile.setNickName(req.nickName());
         userProfile.setUserTagId(req.userTagId());
-        userProfile.setAvatar_url(req.avatar_url());
+        userProfile.setAvatarUrl(req.avatar_url());
         userProfile.setProfileDescription(req.profileDescription());
         userProfile.setBackground_url(req.background_url());
         userProfile.setCountry(req.country());
@@ -78,7 +83,7 @@ public class UserProfileService {
         }
         // Можно добавить проверки на уникальность fields, если нужно
         userProfile.setNickName(req.nickName());
-        userProfile.setAvatar_url(req.avatar_url());
+        userProfile.setAvatarUrl(req.avatar_url());
         userProfile.setProfileDescription(req.profileDescription());
         userProfile.setBackground_url(req.background_url());
         userProfile.setCountry(req.country());
@@ -146,7 +151,7 @@ public class UserProfileService {
                 up.getId(),
                 up.getNickName(),
                 up.getUserTagId(),
-                up.getAvatar_url(),
+                up.getAvatarUrl(),
                 up.getProfileDescription(),
                 up.getBackground_url(),
                 up.getCountry(),
@@ -155,4 +160,9 @@ public class UserProfileService {
                 up.getCreatedAt()
         );
     }
+    @KafkaListener(topics = "user-registered", groupId = "user-profile-group")
+    public void handleUserRegistered(UserRegisteredEvent event) {
+        log.info("Received event: {}", event);
+    }
+
 }
