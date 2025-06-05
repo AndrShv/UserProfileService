@@ -30,5 +30,37 @@ public class Subscription {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getSubscriberId() {
+        return subscriberId;
+    }
+
+    public void setSubscriberId(UUID subscriberId) {
+        this.subscriberId = subscriberId;
+    }
+
+    public UUID getTargetUserId() {
+        return targetUserId;
+    }
+
+    public void setTargetUserId(UUID targetUserId) {
+        this.targetUserId = targetUserId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
 

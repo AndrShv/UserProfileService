@@ -11,5 +11,5 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, UUID> 
     UserProfile findByNickName(String nickName);
     Optional<UserProfile> findById(UUID id);
     boolean existsByUserTagId(String userTagId);
-    boolean existsByAvatar_url(String avatarUrl);
+    boolean existsByAvatarUrl(String avatarUrl);
 }
