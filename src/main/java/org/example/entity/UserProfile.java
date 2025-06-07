@@ -15,21 +15,17 @@ import java.util.UUID;
 public class UserProfile {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @org.hibernate.annotations.GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
     @Column(updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false)
-    private String nickName;
+    private String username;
 
-    @Column(name = "user_tag_id", nullable = false, unique = true)
-    private String userTagId;
+    @Column(nullable = false)
+    private String email;
 
-    @Column(name = "avatar_url", nullable = false, unique = true)
+
+    @Column(name = "avatar_url", unique = true)
     private String avatarUrl;
 
     @Column(name = "profile_description")
@@ -50,4 +46,6 @@ public class UserProfile {
 
     @Column(name = "city")
     private String city;
+
+
 }

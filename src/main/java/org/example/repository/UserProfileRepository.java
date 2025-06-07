@@ -7,9 +7,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserProfileRepository extends JpaRepository<UserProfile, UUID> {
-    UserProfile findByUserTagId(String userTagId);
-    UserProfile findByNickName(String nickName);
+    UserProfile findByUsername(String username);
     Optional<UserProfile> findById(UUID id);
-    boolean existsByUserTagId(String userTagId);
     boolean existsByAvatarUrl(String avatarUrl);
+    UserProfile findByEmail(String email);
+    boolean existsByEmail(String email);
 }
