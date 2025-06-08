@@ -12,3 +12,4 @@ public class UserProfileApplication {
     }
 }
 
+//SELECT BIN_TO_UUID(id) AS id, email, username, created_at FROM user_profiles;
