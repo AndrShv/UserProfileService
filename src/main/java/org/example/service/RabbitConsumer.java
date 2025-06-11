@@ -6,7 +6,7 @@ import org.example.event.UserRegisteredEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-@Component
+@Service
 public class RabbitConsumer {
 
     private final UserProfileService userProfileService;
@@ -15,14 +15,13 @@ public class RabbitConsumer {
         this.userProfileService = userProfileService;
     }
 
-    @RabbitListener(queues = "${queue.name}")
+    @RabbitListener(queues = "user.registered.queue")
     public void receiveFromAuth(UserRegisteredEvent event){
         System.out.println("Получено событие регистрации:");
         System.out.println("Email: " + event.getEmail());
         System.out.println("Username: " + event.getUsername());
         System.out.println("ID: " + event.getId());
 
-        // Проверяем, есть ли уже профиль с таким ID
         boolean exists = userProfileService.existsById(event.getId());
         if (exists) {
             System.out.println("User profile уже существует с ID: " + event.getId() + ", пропускаем создание.");

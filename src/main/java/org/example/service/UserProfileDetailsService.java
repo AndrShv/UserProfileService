@@ -15,11 +15,12 @@ public class UserProfileDetailsService implements UserDetailsService {
 
     private final UserProfileRepository userProfileRepository;
 
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserProfile userProfile = userProfileRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
-        return new UserDetailsImpl(userProfile);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return userProfileRepository.findByEmail(email)
+                .map(UserDetailsImpl::new)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 }
 
