@@ -5,10 +5,12 @@ import org.example.DTO.request.UserProfileRequest;
 import org.example.DTO.response.UserProfileResponse;
 import org.example.entity.Subscription;
 import org.example.entity.UserProfile;
+import org.example.event.UserRegisteredEvent;
 import org.example.repository.SubscriptionRepository;
 import org.example.repository.UserProfileRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -18,34 +20,27 @@ import java.util.stream.Collectors;
 public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final SubscriptionRepository subscriptionRepository;
-
     // 1) Создать профиль
-    public UserProfileResponse createUserProfile(UserProfileRequest req) {
-        if (userProfileRepository.existsByUserTagId(req.userTagId())) {
-            throw new IllegalArgumentException("UserTagId already exists");
-        }
-        if (userProfileRepository.existsByAvatar_url(req.avatar_url())) {
-            throw new IllegalArgumentException("Avatar URL already in use");
+    public UserProfileResponse createUserProfile(UserRegisteredEvent userRegisteredEvent) {
+        if (userProfileRepository.existsByEmail(userRegisteredEvent.getEmail())) {
+            throw new IllegalArgumentException("User profile with this email already exists");
         }
 
         UserProfile userProfile = new UserProfile();
-        userProfile.setNickName(req.nickName());
-        userProfile.setUserTagId(req.userTagId());
-        userProfile.setAvatar_url(req.avatar_url());
-        userProfile.setProfileDescription(req.profileDescription());
-        userProfile.setBackground_url(req.background_url());
-        userProfile.setCountry(req.country());
-        userProfile.setCity(req.city());
-        userProfile.setPrivate(req.isPrivate());
+        userProfile.setId(userRegisteredEvent.getId());
+        userProfile.setUsername(userRegisteredEvent.getUsername());
+        userProfile.setEmail(userRegisteredEvent.getEmail());
+        userProfile.setPrivate(false);
+        userProfile.setCreatedAt(LocalDateTime.now());
 
-        userProfileRepository.save(userProfile);
+        userProfile = userProfileRepository.save(userProfile);
 
         return toResponse(userProfile);
     }
 
-    // 2) Получить профиль по userTagId
-    public UserProfileResponse getUserProfileByUserTagId(String userTagId) {
-        UserProfile userProfile = userProfileRepository.findByUserTagId(userTagId);
+    // 2) Получить профиль по ID (UUID)
+    public UserProfileResponse getUserProfileById(UUID id) {
+        UserProfile userProfile = userProfileRepository.findById(id).orElse(null);
         if (userProfile == null) {
             return null;
         }
@@ -53,32 +48,23 @@ public class UserProfileService {
     }
 
     // 3) Получить профиль по никнейму
-    public UserProfileResponse getUserProfileByNickName(String nickName) {
-        UserProfile userProfile = userProfileRepository.findByNickName(nickName);
+    public UserProfileResponse getUserProfileByUserName(String username) {
+        UserProfile userProfile = userProfileRepository.findByUsername(username);
         if (userProfile == null) {
             return null;
         }
         return toResponse(userProfile);
     }
 
-    // 4) Получить профиль по ID пользователя (UUID)
-    public UserProfileResponse getUserProfileByUserId(UUID userId) {
-        UserProfile userProfile = userProfileRepository.findById(userId).orElse(null);
+    // 4) Обновить профиль по ID (UUID)
+    public UserProfileResponse updateUserProfile(UUID id, UserProfileRequest req) {
+        UserProfile userProfile = userProfileRepository.findById(id).orElse(null);
         if (userProfile == null) {
             return null;
         }
-        return toResponse(userProfile);
-    }
-
-    // 5) Обновить профиль (по userTagId)
-    public UserProfileResponse updateUserProfile(String userTagId, UserProfileRequest req) {
-        UserProfile userProfile = userProfileRepository.findByUserTagId(userTagId);
-        if (userProfile == null) {
-            return null;
-        }
-        // Можно добавить проверки на уникальность fields, если нужно
-        userProfile.setNickName(req.nickName());
-        userProfile.setAvatar_url(req.avatar_url());
+        // Можно добавить проверки на уникальность полей, если нужно
+        userProfile.setUsername(req.username());
+        userProfile.setAvatarUrl(req.avatar_url());
         userProfile.setProfileDescription(req.profileDescription());
         userProfile.setBackground_url(req.background_url());
         userProfile.setCountry(req.country());
@@ -89,9 +75,9 @@ public class UserProfileService {
         return toResponse(userProfile);
     }
 
-    // 6) Удалить профиль (по userTagId)
-    public void deleteUserProfile(String userTagId) {
-        UserProfile userProfile = userProfileRepository.findByUserTagId(userTagId);
+    // 5) Удалить профиль по ID (UUID)
+    public void deleteUserProfile(UUID id) {
+        UserProfile userProfile = userProfileRepository.findById(id).orElse(null);
         if (userProfile != null) {
             userProfileRepository.delete(userProfile);
         } else {
@@ -101,7 +87,7 @@ public class UserProfileService {
 
     // ======================= ПОДПИСКИ =======================
 
-    // 7) Подписаться на пользователя
+    // 6) Подписаться на пользователя
     public void subscribeToUser(UUID subscriberId, UUID targetUserId) {
         if (subscriberId.equals(targetUserId)) {
             throw new IllegalArgumentException("You cannot subscribe to yourself.");
@@ -120,12 +106,12 @@ public class UserProfileService {
         subscriptionRepository.save(subscription);
     }
 
-    // 8) Отписаться от пользователя
+    // 7) Отписаться от пользователя
     public void unsubscribeFromUser(UUID subscriberId, UUID targetUserId) {
         subscriptionRepository.deleteBySubscriberIdAndTargetUserId(subscriberId, targetUserId);
     }
 
-    // 9) Получить список подписчиков у данного пользователя
+    // 8) Получить список подписчиков у данного пользователя
     public List<UUID> getSubscribersForUser(UUID userId) {
         List<Subscription> subs = subscriptionRepository.findAllByTargetUserId(userId);
         return subs.stream()
@@ -133,7 +119,7 @@ public class UserProfileService {
                 .collect(Collectors.toList());
     }
 
-    // 10) Получить список пользователей, на которых подписан данный пользователь
+    // 9) Получить список пользователей, на которых подписан данный пользователь
     public List<UUID> getSubscribedUsers(UUID userId) {
         List<Subscription> subs = subscriptionRepository.findAllBySubscriberId(userId);
         return subs.stream()
@@ -141,18 +127,30 @@ public class UserProfileService {
                 .collect(Collectors.toList());
     }
 
-    private UserProfileResponse toResponse(UserProfile up) {
-        return new UserProfileResponse(
-                up.getId(),
-                up.getNickName(),
-                up.getUserTagId(),
-                up.getAvatar_url(),
-                up.getProfileDescription(),
-                up.getBackground_url(),
-                up.getCountry(),
-                up.getCity(),
-                up.isPrivate(),
-                up.getCreatedAt()
-        );
+    private UserProfileResponse toResponse(UserProfile userProfile) {
+        return UserProfileResponse.builder()
+                .id(userProfile.getId())
+                .username(userProfile.getUsername())
+                .email(userProfile.getEmail())
+                .avatar_url(userProfile.getAvatarUrl())
+                .profileDescription(userProfile.getProfileDescription())
+                .background_url(userProfile.getBackground_url())
+                .country(userProfile.getCountry())
+                .city(userProfile.getCity())
+                .isPrivate(userProfile.isPrivate())
+                .createdAt(userProfile.getCreatedAt())
+                .build();
     }
+
+    public UserProfile findByUsername(String username) {
+        return userProfileRepository.findByUsername(username);
+    }
+
+    public UserProfile save(UserProfile userProfile) {
+        return userProfileRepository.save(userProfile);
+    }
+    public boolean existsById(UUID id) {
+        return userProfileRepository.existsById(id);
+    }
+
 }
