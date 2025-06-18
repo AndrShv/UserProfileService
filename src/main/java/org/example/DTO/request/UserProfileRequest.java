@@ -1,9 +1,13 @@
 package org.example.DTO.request;
 
+import jakarta.validation.constraints.NotBlank;
+
+import java.util.UUID;
+
 public record UserProfileRequest(
-        String nickName,
-        String userTagId,
-        String avatar_url,
+        @NotBlank String username,
+        @NotBlank String email,
+        @NotBlank String avatar_url,
         String profileDescription,
         String background_url,
         String country,
