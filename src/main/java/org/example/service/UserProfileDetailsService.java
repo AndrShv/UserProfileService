@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Service
 public class UserProfileDetailsService implements UserDetailsService {
@@ -17,10 +19,19 @@ public class UserProfileDetailsService implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userProfileRepository.findByEmail(email)
-                .map(UserDetailsImpl::new)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    public UserDetails loadUserByUsername(String userIdOrEmail) throws UsernameNotFoundException {
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(userIdOrEmail);
+        } catch (IllegalArgumentException e) {
+            throw new UsernameNotFoundException("Invalid UUID format: " + userIdOrEmail);
+        }
+        return userProfileRepository.findById(uuid)
+                .map(UserProfileDetails::new)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userIdOrEmail));
     }
+
+
+
 }
 

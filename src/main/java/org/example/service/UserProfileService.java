@@ -8,11 +8,14 @@ import org.example.entity.UserProfile;
 import org.example.event.UserRegisteredEvent;
 import org.example.repository.SubscriptionRepository;
 import org.example.repository.UserProfileRepository;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,6 +109,9 @@ public class UserProfileService {
         subscriptionRepository.save(subscription);
     }
 
+
+
+
     // 7) Отписаться от пользователя
     public void unsubscribeFromUser(UUID subscriberId, UUID targetUserId) {
         subscriptionRepository.deleteBySubscriberIdAndTargetUserId(subscriberId, targetUserId);
@@ -151,6 +157,16 @@ public class UserProfileService {
     }
     public boolean existsById(UUID id) {
         return userProfileRepository.existsById(id);
+    }
+    public boolean canAccessProfile(UUID requesterId, UUID profileOwnerId) {
+        UserProfile profile = userProfileRepository.findById(profileOwnerId)
+                .orElseThrow(null);
+
+        if (!profile.isPrivate()) {
+            return true;
+        }
+
+        return subscriptionRepository.existsBySubscriberIdAndTargetUserId(requesterId, profileOwnerId);
     }
 
 }

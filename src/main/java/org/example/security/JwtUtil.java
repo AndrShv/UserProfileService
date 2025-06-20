@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -32,16 +33,25 @@ public class JwtUtil {
         return parseToken(token).getBody().getSubject();
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token, UserDetails userDetails) {
         try {
             Jws<Claims> claims = parseToken(token);
-            log.info("Token expiration: {}", claims.getBody().getExpiration());
-            return !claims.getBody().getExpiration().before(new Date());
+            String usernameFromToken = claims.getBody().getSubject();
+            Date expiration = claims.getBody().getExpiration();
+            log.info("Token username: {}", usernameFromToken);
+            log.info("Token expiration: {}", expiration);
+
+            boolean isNotExpired = !expiration.before(new Date());
+            boolean usernameMatches = usernameFromToken.equals(userDetails.getUsername());
+
+            return isNotExpired && usernameMatches;
+
         } catch (JwtException | IllegalArgumentException e) {
             log.error("Token validation failed", e);
             return false;
         }
     }
+
 
 
 

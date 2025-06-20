@@ -4,13 +4,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.DTO.request.UserProfileRequest;
 import org.example.DTO.response.UserProfileResponse;
+import org.example.DTO.response.VideoProfileResponse;
 import org.example.entity.UserProfile;
 import org.example.repository.UserProfileRepository;
+import org.example.service.ProfileVideoService;
 import org.example.service.UserProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +24,7 @@ public class UserProfileController {
 
     private final UserProfileService service;
     private final UserProfileRepository userProfileRepository;
-
+    private final ProfileVideoService profileVideoService;
 
     // Получение по UUID id
     @GetMapping("/user-profiles/{id}")
@@ -30,7 +33,7 @@ public class UserProfileController {
         try {
             uuid = UUID.fromString(id);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build(); // некорректный формат UUID
+            return ResponseEntity.badRequest().build();
         }
         return userProfileRepository.findById(uuid)
                 .map(ResponseEntity::ok)
@@ -83,4 +86,6 @@ public class UserProfileController {
     public ResponseEntity<List<UUID>> getFollowing(@PathVariable UUID userId) {
         return ResponseEntity.ok(service.getSubscribedUsers(userId));
     }
+
+
 }

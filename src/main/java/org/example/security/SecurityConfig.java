@@ -30,7 +30,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/videos-from-profile/**").permitAll()
+
+                        .anyRequest().denyAll()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
