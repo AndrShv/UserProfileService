@@ -12,5 +12,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
     List<Subscription> findAllBySubscriberId(UUID subscriberId);
     List<Subscription> findAllByTargetUserId(UUID targetUserId);
     void deleteBySubscriberIdAndTargetUserId(UUID subscriberId, UUID targetUserId);
+    boolean existsBySubscriberIdAndTargetUserId(UUID subscriberId, UUID targetUserId);
+
 }
 
