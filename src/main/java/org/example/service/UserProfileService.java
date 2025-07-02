@@ -25,9 +25,18 @@ public class UserProfileService {
     private final SubscriptionRepository subscriptionRepository;
     // 1) Создать профиль
     public UserProfileResponse createUserProfile(UserRegisteredEvent userRegisteredEvent) {
+        if (userRegisteredEvent.getEmail() == null || userRegisteredEvent.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be null or empty");
+        }
+
         if (userProfileRepository.existsByEmail(userRegisteredEvent.getEmail())) {
             throw new IllegalArgumentException("User profile with this email already exists");
         }
+
+       if (userRegisteredEvent.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+
 
         UserProfile userProfile = new UserProfile();
         userProfile.setId(userRegisteredEvent.getId());

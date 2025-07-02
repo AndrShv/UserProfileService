@@ -1,10 +1,9 @@
-package org.example.service;
+package org.example.listeners;
 
-import jakarta.websocket.server.ServerEndpoint;
 import org.example.entity.UserProfile;
 import org.example.event.UserRegisteredEvent;
+import org.example.service.UserProfileService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 @Service
 public class RabbitConsumer {

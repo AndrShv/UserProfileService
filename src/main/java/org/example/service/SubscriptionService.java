@@ -14,6 +14,9 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
 
     public boolean isSubscribed(UUID viewerId, UUID profileOwnerId) {
+        if (viewerId == null || profileOwnerId == null) {
+            throw new IllegalArgumentException("Viewer ID or Profile Owner ID must not be null");
+        }
         return subscriptionRepository.existsBySubscriberIdAndTargetUserId(viewerId, profileOwnerId);
     }
 }

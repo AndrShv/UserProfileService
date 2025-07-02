@@ -1,11 +1,9 @@
 package org.example.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -73,6 +71,22 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public DirectExchange commentExchange() {
+        return new DirectExchange("comment.exchange");
+    }
+
+    @Bean
+    public Queue commentQueue() {
+        return new Queue("comment.queue", true);
+    }
+
+    @Bean
+    public Binding commentBinding(Queue commentQueue, DirectExchange commentExchange) {
+        return BindingBuilder.bind(commentQueue).to(commentExchange).with("comment.create");
+    }
+
+
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
@@ -92,7 +106,9 @@ public class RabbitMqConfig {
     }
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule()); // ✅ підтримка LocalDateTime
+        return new Jackson2JsonMessageConverter(mapper);
     }
 
     @Bean

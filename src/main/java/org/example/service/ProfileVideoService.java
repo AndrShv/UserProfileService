@@ -34,7 +34,7 @@ public class ProfileVideoService {
 
         boolean isSubscribed = subscriptionRepository.existsBySubscriberIdAndTargetUserId(viewerId, profileOwnerId);
 
-        if (profile.isPrivate() && !viewerId.equals(profileOwnerId) && !isSubscribed) {
+        if (profile.isPrivate() && viewerId != profileOwnerId && !isSubscribed) {
             throw new SecurityException("Profile is private");
         }
 
